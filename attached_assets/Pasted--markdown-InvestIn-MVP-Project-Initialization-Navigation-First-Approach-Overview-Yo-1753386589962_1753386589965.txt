@@ -1,0 +1,102 @@
+```markdown
+# InvestIn MVP: Project Initialization (Navigation-First Approach)
+
+## Overview
+
+You're building the InvestIn MVP (Movies & IPL Teams as Tradable Assets) on Replit. The first milestone is to set up a clean, scalable navigation system with empty placeholder screens. This enables incremental and organized addition of functional, visually rich screens—one at a time.
+
+## Assumptions
+
+- Stack: React.js (or Next.js CRA-based template)  
+- Routing: React Router (or Next.js native routing)  
+- State Management: React Context (for navigation state)
+- CSS: TailwindCSS or Styled-Components (for quick responsive UI scaffolding)
+- Credentials: Handled via .env (keep API keys e.g., Brevo, secure)
+- Project structure supports later breakout for UI/UX improvements and animations.
+
+## Example Project Scaffold (React with React Router)
+
+Here’s a minimal React + React Router (v6+) codebase with navigation and ten placeholder screens.
+
+```
+// src/App.js
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from "react-router-dom";
+
+const screens = [
+  { path: "/dashboard", name: "Dashboard" },
+  { path: "/marketplace", name: "Marketplace" },
+  { path: "/movies", name: "Movies" },
+  { path: "/ipl-teams", name: "IPL Teams" },
+  { path: "/portfolio", name: "Portfolio" },
+  { path: "/watchlist", name: "Watchlist" },
+  { path: "/transactions", name: "Transactions" },
+  { path: "/leaderboard", name: "Leaderboard" },
+  { path: "/news", name: "News" },
+  { path: "/settings", name: "Settings" },
+];
+
+// Empty placeholder for screens
+const BlankPage = ({ name }) => (
+  
+    {name} (Coming Soon)
+  
+);
+
+// Persistent navigation bar
+const Navbar = () => (
+  
+    {screens.map(({ path, name }) => (
+      
+        {name}
+      
+    ))}
+  
+);
+
+export default function App() {
+  return (
+    
+      
+      
+        } />
+        {screens.map(({ path, name }) => (
+          } />
+        ))}
+        {/* Fallback for undefined paths */}
+        } />
+      
+    
+  );
+}
+```
+
+---
+
+## Quick Setup Instructions
+
+1. **On Replit, create a new React.js project.**
+2. **Replace `src/App.js` with the code above.**
+3. **Ensure `react-router-dom` is installed:**
+   ```
+   npm install react-router-dom
+   ```
+4. **Run and preview the app.**  
+   You’ll see a persistent navbar and ten screens with navigation in place—ready for incremental development.
+
+---
+
+## Recommended Next Steps
+
+- Define a folder/module for each screen (e.g., `src/pages/Dashboard.js`) to enable modular growth.
+- When ready to implement a full screen, replace `` with your full-featured page component.
+- Use `.env` for any service keys/configs, ensuring security and best practices.
+
+---
+
+## 💡 As Your Prompt Engineer
+
+- For each new page, draft a detailed prompt:
+  - Objective, UX components, data attributes, interactions, animation/UX specs, success validations.
+- I’ll help you iterate on clean, scalable, and well-validated component code for each phase.
+```
