@@ -3,13 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, TrendingUp, TrendingDown, Star, Trophy, Calendar, Activity } from "lucide-react";
+import { Search, TrendingUp, TrendingDown, Star, Trophy, Calendar, Activity, Zap, Users } from "lucide-react";
 import TradingModal from "@/components/TradingModal";
 import AssetCard from "@/components/AssetCard";
 import AssetDetail from "@/components/AssetDetail";
 import { allAssets, AssetData, mockNewsTicker } from "../data/assets";
 import { IVCDisplay } from "../components/IVCLogo";
 import { convertAssetDataToTradingAsset } from "../utils/assetConverter";
+import { TrendingBar } from "../components/TrendingBar";
+import { FlashEventBanner } from "../components/FlashEventBanner";
+import { TeluguTraderHallOfFame } from "../components/TeluguTraderHallOfFame";
 
 export default function Marketplace() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -242,6 +245,21 @@ export default function Marketplace() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Flash Events Banner */}
+      <div className="mb-8">
+        <FlashEventBanner />
+      </div>
+
+      {/* Enhanced Trending Bar */}
+      <div className="mb-8">
+        <TrendingBar />
+      </div>
+
+      {/* Telugu Trader Hall of Fame */}
+      <div className="mb-8">
+        <TeluguTraderHallOfFame />
       </div>
 
       {/* Trending Assets */}
