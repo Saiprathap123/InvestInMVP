@@ -14,6 +14,7 @@ import Transactions from "@/pages/Transactions";
 import Leaderboard from "@/pages/Leaderboard";
 import News from "@/pages/News";
 import Settings from "@/pages/Settings";
+import AssetDetailPage from "@/pages/AssetDetailPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -31,6 +32,7 @@ function Router() {
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/news" component={News} />
         <Route path="/settings" component={Settings} />
+        <Route path="/asset/:id" component={AssetDetailPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

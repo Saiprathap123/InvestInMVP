@@ -130,7 +130,7 @@ export default function Leaderboard() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Award className="h-6 w-6 text-gold-500" />
+            <Award className="h-6 w-6 text-yellow-500" />
             Global Rankings
           </CardTitle>
           <div className="flex gap-2 mt-4">
@@ -248,7 +248,7 @@ export default function Leaderboard() {
                       </div>
                       <div className="text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3 inline mr-1" />
-                        Member since {user.joinDate}
+                        Member since March 2024
                       </div>
                     </div>
                   </div>

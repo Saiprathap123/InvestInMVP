@@ -1,0 +1,81 @@
+```markdown
+# InvestIn MVP — Navigation, Pro Side Drawer, & Profile UX Changes Prompt
+
+Implement these crucial upgrades to perfect your pre-MVP showcase:
+
+---
+
+## 1. **Fix Asset Navigation in Marketplace & Trending Sections**
+- Ensure every asset listed (Top Gainers, Top Losers, Most Traded, Flash Events, TrendingBar, and all other sections/cards/lists) is **wrapped in a clickable element**—on click, route to `/asset/:id` (the AssetDetail page), passing the asset’s ID or symbol.
+- Refactor all asset render logic: 
+    - Use React Router’s `useNavigate()` or `` for routing.
+    - For cards or rows, wrap entire visual (not just hidden button) for clear, accessible navigation.
+    - Apply visual cue (pointer cursor, slight hover shadow/color) to reinforce clickability.
+    - Add test-case example for navigation in `Marketplace`, `TrendingBar`, `FlashEventBanner`, and all list renders.
+
+---
+
+## 2. **Professional, Hidden Sidebar/Menu (Drawer)**
+- Replace persistent left-sidebar with a **slide-in Drawer/Offcanvas** menu:
+    - Hidden by default on desktop and mobile.
+    - Add a prominent hamburger/icon button (top-left in header) to open/close.
+    - On open, animate side drawer in from the left with smooth transition.
+    - Rearrange menu items for clarity—sections: Marketplace, Portfolio, Movies, IPL Teams, Leaderboard, Hall of Fame, Fan Hubs, Flash Events, Settings.
+    - Use sectioned headers and icons for improved clarity and aesthetics.
+- Close drawer when user clicks anywhere outside menu or selects an item (mobile UX standard).
+- Dark overlay background when open for focused effect.
+
+---
+
+## 3. **Right-Aligned Profile, Add Credit, and Settings in Header**
+- In the header, **right-align**:
+    - User “profile” button/icon (avatar, or placeholder)
+    - Add Credit/Wallet top-up control
+    - Settings menu/dropdown (theme toggle, language—but all static for demo)
+- Use intuitive icons, tooltips on hover for each.
+- Clicking profile opens **Profile Drawer/Panel** from the right (see below).
+
+---
+
+## 4. **User Profiles & Static Authentication Mockup**
+- On profile click, open a **slide-in panel** or modal with:
+    - Static demo user info (avatar, username, brief bio)
+    - Account stats: join date, total trades, achievements, regional badge (Telugu/Andhra/Telangana)
+    - Links (non-functional for now): Edit Profile, Change Avatar, My Achievements
+    - Option to logout or switch user (no actual functionality for MVP)
+- Add “logged in as…” or “Welcome, [name]” on dashboard/marketplace, static only.
+
+---
+
+## 5. **UI/UX Touches**
+- Ensure all navigation bars, drawers, and sliders are **responsive and mobile-first**.
+- Remove visual clutter from main screens—clearly segment content.
+- Animation for open/close menus (200-300ms ease).
+- Refresh iconography with modern icon set (e.g., Material Icons, Tabler Icons).
+- Test all navigation flows and accessibility.
+- Hide left menu by default for both desktop and mobile; show only on menu icon click.
+
+---
+
+## 6. **Checklist for Implementation**
+- [ ] Every asset in every UI section routes to details page on click.
+- [ ] Sidebar/drawer menu is fully hidden until toggled; professionally organized; closes on overlay/click.
+- [ ] All right-side header buttons (profile, add credit, settings) are present, aligned, and functional visually.
+- [ ] User profile panel with static data is implemented and polished.
+- [ ] All navigation and overlays work seamlessly on mobile and desktop.
+- [ ] Dark/light mode continues to work across all overlays and menus.
+
+---
+
+### 🚦 Use These Section Prompts in Codebase
+
+- `` — Hidden, toggled left-side navigation.
+- `` — Profile, Add Credit, Settings (right-aligned, responsive).
+- `` — Slide-in drawer from right, static demo data.
+- ` navigate(`/asset/${asset.id}`)} ... />` — Use for all asset display.
+- Test navigation by clicking assets in top gainers/losers/trending/mosttraded.
+
+---
+
+**By making these changes, your MVP will exhibit professional app navigation, polished menu/drawer experiences, universally accessible asset details, and clear user flows ready to impress investors, users, and demo viewers.**
+```

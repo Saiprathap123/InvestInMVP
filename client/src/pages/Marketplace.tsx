@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, TrendingUp, TrendingDown, Star, Trophy, Calendar, Activity, Zap, Users } from "lucide-react";
 import TradingModal from "@/components/TradingModal";
 import AssetCard from "@/components/AssetCard";
-import AssetDetail from "@/components/AssetDetail";
 import { allAssets, AssetData, mockNewsTicker } from "../data/assets";
 import { IVCDisplay } from "../components/IVCLogo";
 import { convertAssetDataToTradingAsset } from "../utils/assetConverter";
@@ -17,19 +17,13 @@ import { TeluguTraderHallOfFame } from "../components/TeluguTraderHallOfFame";
 export default function Marketplace() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedAsset, setSelectedAsset] = useState<AssetData | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [tradeAsset, setTradeAsset] = useState<AssetData | null>(null);
 
-  const handleAssetClick = (asset: AssetData) => {
-    setSelectedAsset(asset);
-    setViewMode('detail');
-  };
+  const [, setLocation] = useLocation();
 
-  const handleBackToList = () => {
-    setSelectedAsset(null);
-    setViewMode('list');
+  const handleAssetClick = (asset: AssetData) => {
+    setLocation(`/asset/${asset.id}`);
   };
 
   const handleTrade = (asset: AssetData) => {
@@ -66,27 +60,6 @@ export default function Marketplace() {
     .filter(asset => asset.change < 0)
     .sort((a, b) => a.percentChange - b.percentChange)
     .slice(0, 3);
-
-  if (viewMode === 'detail' && selectedAsset) {
-    return (
-      <>
-        <AssetDetail
-          asset={selectedAsset}
-          onBack={handleBackToList}
-          onTrade={handleTrade}
-          onWatchlist={handleWatchlist}
-        />
-        <TradingModal
-          asset={tradeAsset ? convertAssetDataToTradingAsset(tradeAsset) : null}
-          isOpen={isTradeModalOpen}
-          onClose={() => {
-            setIsTradeModalOpen(false);
-            setTradeAsset(null);
-          }}
-        />
-      </>
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -200,11 +173,19 @@ export default function Marketplace() {
           <CardContent>
             <div className="space-y-3">
               {topGainers.map((asset) => (
-                <div key={asset.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div 
+                  key={asset.id} 
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleAssetClick(asset)}
+                >
                   <div className="flex items-center gap-3">
                     <img src={asset.image} alt={asset.name} className="w-8 h-8 rounded object-cover" />
                     <div>
-                      <p className="font-medium text-sm">{asset.ticker}</p>
+                      <p className="font-medium text-sm flex items-center gap-2">
+                        {asset.ticker}
+                        {asset.isFlashEvent && <Zap className="w-3 h-3 text-yellow-500" />}
+                        {asset.fanHub && <Users className="w-3 h-3 text-purple-500" />}
+                      </p>
                       <p className="text-xs text-gray-600">{asset.name}</p>
                     </div>
                   </div>
@@ -228,11 +209,19 @@ export default function Marketplace() {
           <CardContent>
             <div className="space-y-3">
               {topLosers.map((asset) => (
-                <div key={asset.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div 
+                  key={asset.id} 
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleAssetClick(asset)}
+                >
                   <div className="flex items-center gap-3">
                     <img src={asset.image} alt={asset.name} className="w-8 h-8 rounded object-cover" />
                     <div>
-                      <p className="font-medium text-sm">{asset.ticker}</p>
+                      <p className="font-medium text-sm flex items-center gap-2">
+                        {asset.ticker}
+                        {asset.isFlashEvent && <Zap className="w-3 h-3 text-yellow-500" />}
+                        {asset.fanHub && <Users className="w-3 h-3 text-purple-500" />}
+                      </p>
                       <p className="text-xs text-gray-600">{asset.name}</p>
                     </div>
                   </div>

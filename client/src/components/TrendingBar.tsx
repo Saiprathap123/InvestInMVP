@@ -1,3 +1,4 @@
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -6,6 +7,7 @@ import { trendingAssets, allAssets } from '@/data/assets';
 import IVCLogo from './IVCLogo';
 
 export function TrendingBar() {
+  const [, setLocation] = useLocation();
   const getTrendingList = (type: keyof typeof trendingAssets) => {
     return trendingAssets[type].map(id => allAssets.find(asset => asset.id === id)).filter(Boolean);
   };
@@ -37,7 +39,11 @@ export function TrendingBar() {
           <ScrollArea className="h-40">
             <div className="space-y-2">
               {getTrendingList('mostTraded').map((asset, index) => (
-                <div key={asset?.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded-lg transition-colors">
+                <div 
+                  key={asset?.id} 
+                  className="flex items-center justify-between p-2 hover:bg-muted/50 rounded-lg transition-colors cursor-pointer"
+                  onClick={() => asset && setLocation(`/asset/${asset.id}`)}
+                >
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="w-6 h-6 p-0 text-xs flex items-center justify-center">
                       {index + 1}
@@ -77,7 +83,11 @@ export function TrendingBar() {
           <ScrollArea className="h-40">
             <div className="space-y-2">
               {getTrendingList('mostWatched').map((asset, index) => (
-                <div key={asset?.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded-lg transition-colors">
+                <div 
+                  key={asset?.id} 
+                  className="flex items-center justify-between p-2 hover:bg-muted/50 rounded-lg transition-colors cursor-pointer"
+                  onClick={() => asset && setLocation(`/asset/${asset.id}`)}
+                >
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="w-6 h-6 p-0 text-xs flex items-center justify-center">
                       {index + 1}
@@ -127,7 +137,11 @@ export function TrendingBar() {
                 </h4>
                 <div className="space-y-1">
                   {getTrendingList('flashEvents').map((asset) => (
-                    <div key={asset?.id} className="flex items-center justify-between p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                    <div 
+                      key={asset?.id} 
+                      className="flex items-center justify-between p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors"
+                      onClick={() => asset && setLocation(`/asset/${asset.id}`)}
+                    >
                       <div className="font-medium text-sm flex items-center gap-1">
                         <Zap className="h-3 w-3 text-yellow-500" />
                         {asset?.ticker}
@@ -148,7 +162,11 @@ export function TrendingBar() {
                 </h4>
                 <div className="space-y-1">
                   {getTrendingList('topGainers').slice(0, 3).map((asset) => (
-                    <div key={asset?.id} className="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div 
+                      key={asset?.id} 
+                      className="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 rounded-lg cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+                      onClick={() => asset && setLocation(`/asset/${asset.id}`)}
+                    >
                       <div className="font-medium text-sm">{asset?.ticker}</div>
                       <div className="text-green-600 dark:text-green-400 text-xs font-medium">
                         +{asset?.percentChange?.toFixed(1)}%

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Filter, TrendingUp, Trophy, Users, Target } from "lucide-react";
 import { iplTeamAssets, AssetData } from "../data/assets";
 import AssetCard from "../components/AssetCard";
-import AssetDetail from "../components/AssetDetail";
 import TradingModal from "../components/TradingModal";
 import { IVCDisplay } from "../components/IVCLogo";
 import { convertAssetDataToTradingAsset } from "../utils/assetConverter";
@@ -14,19 +14,13 @@ import { convertAssetDataToTradingAsset } from "../utils/assetConverter";
 export default function IplTeams() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("popularity");
-  const [selectedAsset, setSelectedAsset] = useState<AssetData | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [tradeAsset, setTradeAsset] = useState<AssetData | null>(null);
 
-  const handleAssetClick = (asset: AssetData) => {
-    setSelectedAsset(asset);
-    setViewMode('detail');
-  };
+  const [, setLocation] = useLocation();
 
-  const handleBackToList = () => {
-    setSelectedAsset(null);
-    setViewMode('list');
+  const handleAssetClick = (asset: AssetData) => {
+    setLocation(`/asset/${asset.id}`);
   };
 
   const handleTrade = (asset: AssetData) => {
@@ -58,26 +52,7 @@ export default function IplTeams() {
     }
   });
 
-  if (viewMode === 'detail' && selectedAsset) {
-    return (
-      <>
-        <AssetDetail
-          asset={selectedAsset}
-          onBack={handleBackToList}
-          onTrade={handleTrade}
-          onWatchlist={handleWatchlist}
-        />
-        <TradingModal
-          asset={tradeAsset ? convertAssetDataToTradingAsset(tradeAsset) : null}
-          isOpen={isTradeModalOpen}
-          onClose={() => {
-            setIsTradeModalOpen(false);
-            setTradeAsset(null);
-          }}
-        />
-      </>
-    );
-  }
+
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
