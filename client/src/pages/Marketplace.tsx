@@ -1,50 +1,156 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Search, TrendingUp, TrendingDown, Eye } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Search, TrendingUp, TrendingDown, Star, Trophy, Calendar, Activity } from "lucide-react";
 import TradingModal from "@/components/TradingModal";
-import type { Asset } from "@shared/schema";
+import AssetCard from "@/components/AssetCard";
+import AssetDetail from "@/components/AssetDetail";
+import { allAssets, AssetData, mockNewsTicker } from "../data/assets";
+import { IVCDisplay } from "../components/IVCLogo";
+import { convertAssetDataToTradingAsset } from "../utils/assetConverter";
 
 export default function Marketplace() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<AssetData | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
+  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
+  const [tradeAsset, setTradeAsset] = useState<AssetData | null>(null);
 
-  const { data: assets, isLoading } = useQuery<Asset[]>({
-    queryKey: ["/api/assets"],
-  });
+  const handleAssetClick = (asset: AssetData) => {
+    setSelectedAsset(asset);
+    setViewMode('detail');
+  };
 
-  if (isLoading || !assets) {
-    return <MarketplaceSkeleton />;
-  }
+  const handleBackToList = () => {
+    setSelectedAsset(null);
+    setViewMode('list');
+  };
+
+  const handleTrade = (asset: AssetData) => {
+    setTradeAsset(asset);
+    setIsTradeModalOpen(true);
+  };
+
+  const handleWatchlist = (asset: AssetData) => {
+    console.log(`Added ${asset.name} to watchlist`);
+  };
 
   // Filter assets based on search and category
-  const filteredAssets = assets.filter((asset) => {
+  const filteredAssets = allAssets.filter((asset) => {
     const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         asset.symbol.toLowerCase().includes(searchTerm.toLowerCase());
+                         asset.ticker.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || 
-                           (selectedCategory === "movies" && asset.type === "movie") ||
-                           (selectedCategory === "ipl" && asset.type === "ipl_team");
+                           (selectedCategory === "movies" && asset.category === "Movie") ||
+                           (selectedCategory === "ipl" && asset.category === "IPL Team");
     return matchesSearch && matchesCategory;
   });
 
-  // Get trending assets (top 4 by price change)
-  const trendingAssets = assets
-    .map(asset => ({
-      ...asset,
-      changePercent: ((parseFloat(asset.currentPrice) - parseFloat(asset.previousPrice)) / parseFloat(asset.previousPrice)) * 100
-    }))
-    .sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent))
+  // Get trending assets (top performers)
+  const trendingAssets = [...allAssets]
+    .sort((a, b) => Math.abs(b.percentChange) - Math.abs(a.percentChange))
     .slice(0, 4);
+
+  // Get top movers
+  const topGainers = [...allAssets]
+    .filter(asset => asset.change > 0)
+    .sort((a, b) => b.percentChange - a.percentChange)
+    .slice(0, 3);
+
+  const topLosers = [...allAssets]
+    .filter(asset => asset.change < 0)
+    .sort((a, b) => a.percentChange - b.percentChange)
+    .slice(0, 3);
+
+  if (viewMode === 'detail' && selectedAsset) {
+    return (
+      <>
+        <AssetDetail
+          asset={selectedAsset}
+          onBack={handleBackToList}
+          onTrade={handleTrade}
+          onWatchlist={handleWatchlist}
+        />
+        <TradingModal
+          asset={tradeAsset ? convertAssetDataToTradingAsset(tradeAsset) : null}
+          isOpen={isTradeModalOpen}
+          onClose={() => {
+            setIsTradeModalOpen(false);
+            setTradeAsset(null);
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* News Ticker */}
+      <div className="mb-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-3 overflow-hidden">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4 animate-pulse" />
+          <div className="flex animate-scroll">
+            <span className="text-sm whitespace-nowrap">
+              {mockNewsTicker.join(' • ')} • {mockNewsTicker.join(' • ')}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Market Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Total Assets</p>
+                <p className="text-2xl font-bold">{allAssets.length}</p>
+              </div>
+              <Star className="w-8 h-8 text-yellow-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Movies</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {allAssets.filter(a => a.category === 'Movie').length}
+                </p>
+              </div>
+              <Calendar className="w-8 h-8 text-purple-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">IPL Teams</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {allAssets.filter(a => a.category === 'IPL Team').length}
+                </p>
+              </div>
+              <Trophy className="w-8 h-8 text-orange-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Market Status</p>
+                <p className="text-2xl font-bold text-green-600">Active</p>
+              </div>
+              <div className="w-8 h-8 bg-green-500 rounded-full animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Filter and Search Section */}
       <Card className="mb-8">
         <CardContent className="p-6">
@@ -79,195 +185,110 @@ export default function Marketplace() {
         </CardContent>
       </Card>
 
+      {/* Top Movers Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-600">
+              <TrendingUp className="w-5 h-5" />
+              Top Gainers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topGainers.map((asset) => (
+                <div key={asset.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <img src={asset.image} alt={asset.name} className="w-8 h-8 rounded object-cover" />
+                    <div>
+                      <p className="font-medium text-sm">{asset.ticker}</p>
+                      <p className="text-xs text-gray-600">{asset.name}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <IVCDisplay amount={asset.price} size="sm" />
+                    <p className="text-green-600 text-xs font-medium">+{asset.percentChange}%</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-600">
+              <TrendingDown className="w-5 h-5" />
+              Top Losers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topLosers.map((asset) => (
+                <div key={asset.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <img src={asset.image} alt={asset.name} className="w-8 h-8 rounded object-cover" />
+                    <div>
+                      <p className="font-medium text-sm">{asset.ticker}</p>
+                      <p className="text-xs text-gray-600">{asset.name}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <IVCDisplay amount={asset.price} size="sm" />
+                    <p className="text-red-600 text-xs font-medium">{asset.percentChange}%</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Trending Assets */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Trending Now</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {trendingAssets.map((asset) => {
-            const isPositive = asset.changePercent >= 0;
-            return (
-              <Card key={asset.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                <img
-                  src={asset.imageUrl || "https://images.unsplash.com/photo-1489599904632-8421fd8675c2?w=400&h=600"}
-                  alt={asset.name}
-                  className="w-full h-64 object-cover rounded-t-xl"
-                />
-                <CardContent className="p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">{asset.name}</h4>
-                  <p className="text-sm text-gray-600 mb-3">{asset.category}</p>
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-lg font-bold text-gray-900">
-                      ₹{parseFloat(asset.currentPrice).toLocaleString()}
-                    </span>
-                    <span className={cn("text-sm font-medium flex items-center", isPositive ? "text-success" : "text-danger")}>
-                      {isPositive ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                      {isPositive ? "+" : ""}{asset.changePercent.toFixed(1)}%
-                    </span>
-                  </div>
-                  <Button 
-                    className="w-full bg-brand-blue text-white hover:bg-blue-600"
-                    onClick={() => {
-                      setSelectedAsset(asset);
-                      setIsModalOpen(true);
-                    }}
-                  >
-                    Trade Now
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* All Assets Table */}
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold">All Assets</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Asset
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Current Price
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    24h Change
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Market Cap
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredAssets.map((asset) => {
-                  const changePercent = ((parseFloat(asset.currentPrice) - parseFloat(asset.previousPrice)) / parseFloat(asset.previousPrice)) * 100;
-                  const isPositive = changePercent >= 0;
-
-                  return (
-                    <tr key={asset.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <img
-                            src={asset.imageUrl || "https://images.unsplash.com/photo-1489599904632-8421fd8675c2?w=50&h=50"}
-                            alt={asset.name}
-                            className="w-8 h-8 rounded object-cover mr-3"
-                          />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{asset.name}</div>
-                            <div className="text-sm text-gray-500">{asset.description}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
-                        {asset.type === "movie" ? "Movie" : "IPL Team"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ₹{parseFloat(asset.currentPrice).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={cn("font-medium", isPositive ? "text-success" : "text-danger")}>
-                          {isPositive ? "+" : ""}{changePercent.toFixed(1)}%
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ₹{(parseFloat(asset.marketCap) / 10000000).toFixed(1)}Cr
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="flex space-x-2">
-                          <Button 
-                            size="sm" 
-                            className="bg-brand-blue text-white hover:bg-blue-600"
-                            onClick={() => {
-                              setSelectedAsset(asset);
-                              setIsModalOpen(true);
-                            }}
-                          >
-                            Trade
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <TradingModal
-        asset={selectedAsset}
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedAsset(null);
-        }}
-      />
-    </div>
-  );
-}
-
-function MarketplaceSkeleton() {
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Card className="mb-8">
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start space-y-4 sm:space-y-0">
-            <div>
-              <Skeleton className="h-6 w-32 mb-2" />
-              <Skeleton className="h-4 w-48" />
-            </div>
-            <div className="flex space-x-3">
-              <Skeleton className="h-10 w-64" />
-              <Skeleton className="h-10 w-40" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="mb-8">
-        <Skeleton className="h-6 w-32 mb-4" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i}>
-              <Skeleton className="w-full h-64 rounded-t-xl" />
-              <CardContent className="p-4">
-                <Skeleton className="h-5 w-24 mb-2" />
-                <Skeleton className="h-4 w-16 mb-3" />
-                <div className="flex justify-between items-center mb-3">
-                  <Skeleton className="h-5 w-16" />
-                  <Skeleton className="h-4 w-12" />
-                </div>
-                <Skeleton className="h-10 w-full" />
-              </CardContent>
-            </Card>
+          {trendingAssets.map((asset) => (
+            <AssetCard
+              key={asset.id}
+              asset={asset}
+              onClick={handleAssetClick}
+              compact={true}
+            />
           ))}
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-24" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-64 w-full" />
-        </CardContent>
-      </Card>
+      {/* All Assets Grid */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          All Assets ({filteredAssets.length})
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredAssets.map((asset) => (
+            <AssetCard
+              key={asset.id}
+              asset={asset}
+              onClick={handleAssetClick}
+            />
+          ))}
+        </div>
+      </div>
+
+      {filteredAssets.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No assets found matching your search.</p>
+        </div>
+      )}
+
+      <TradingModal
+        asset={tradeAsset ? convertAssetDataToTradingAsset(tradeAsset) : null}
+        isOpen={isTradeModalOpen}
+        onClose={() => {
+          setIsTradeModalOpen(false);
+          setTradeAsset(null);
+        }}
+      />
     </div>
   );
 }

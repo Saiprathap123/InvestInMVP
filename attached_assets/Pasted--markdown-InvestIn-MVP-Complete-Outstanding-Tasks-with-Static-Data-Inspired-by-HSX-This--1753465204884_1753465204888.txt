@@ -1,0 +1,161 @@
+```markdown
+# InvestIn MVP – Complete Outstanding Tasks with Static Data (Inspired by HSX)
+
+This prompt ensures you build out the **full MVP**: all asset pages (movies, IPL teams), detailed asset views with rich UI, portfolio drilldown, transaction history, watchlist, news/events ticker, and a custom coin (“InvestIn Coin”). All screens must be responsive and visually engaging, populated with static/mock data. Use graphs or cards to represent each asset (like HSX), and employ visual cues and clear components—no backend or real-time data required for this phase.
+
+---
+
+## 🏁 Replit Next Steps – One Prompt, Unified Development Approach
+
+1. **Setup: Custom Coin**
+   - Replace INR/₹ with **“InvestIn Coin (IVC)”** throughout the UI.
+   - Show IVC logo/icon beside all balances.
+
+2. **Asset Pages & Representation**
+   - Build dedicated pages for:
+     - All Movies (list)
+     - Movie Detail (per asset)
+     - All IPL Teams (list)
+     - IPL Team Detail (per asset)
+   - Use static arrays for movie/team data. Each asset includes:
+     - Icon or poster (static image)
+     - Name and symbol (e.g., $PUSHPA, $CSK)
+     - Category (Movie/Team)
+     - Description
+     - Current price (in IVC)
+     - Change (+/- IVC, %)
+     - Graphical price chart (use a simple area or line chart, static data)
+     - News/events feed (use static array of headlines with dates)
+   - List assets as **cards** in grid. On click, open asset detail.
+
+3. **Portfolio Page**
+   - Show pie/bar chart of holdings by asset.
+   - Per-asset breakdown:
+     - Quantity held, value (IVC), P&L.
+   - List of recent transactions for each asset.
+
+4. **Transaction History**
+   - Table of all past trades.
+   - Sort/filter by asset, date, buy/sell.
+   - Show IVC amounts and link to asset page.
+
+5. **Watchlist**
+   - Track favorite assets.
+   - Show price and % move in color (green/red).
+   - Add/remove button; quick trade action.
+
+6. **Marketplace**
+   - Combine both asset types in trending view, with graphical representation and top/bar performance indicators (inspired by [HSX Top Traders][1]).
+   - Highlight top movers, most active, and upcoming IPOs (“Movies Opening Soon”).
+
+7. **Wallet and Top-Up**
+   - Show visually rich wallet section (IVC logo, balance).
+   - “Top Up” gives more demo coins (increments IVC by fixed static amount).
+
+8. **News & Events**
+   - Add scrolling ticker on main/dashboard landing page (static asset-related news).
+   - On each detail page: events/history section, relating to price chart.
+
+9. **UI/UX & Responsiveness**
+   - All layouts must work on mobile/desktop (grid/flex, mobile-first).
+   - Support dark and light mode toggles.
+
+10. **Toasts/Feedback**
+    - Buy/sell/topup shows confirmation popup, error for invalid actions.
+
+---
+
+## 🎯 Static Data Examples (use for mockup)
+
+### Movie Asset
+```
+{
+  id: 'pushpa2',
+  ticker: 'PUSHPA2',
+  name: 'Pushpa: The Rule',
+  category: 'Movie',
+  image: '/images/pushpa2.jpg',
+  description: 'Biggest action entertainer, starring Allu Arjun.',
+  price: 120.0,
+  change: +6.5,
+  percentChange: +5.7,
+  chartData: [100, 101, 105, 109,  // use for mock chart
+  newsFeed: [
+    { date: '2025-07-20', headline: 'Teaser breaks YouTube records' },
+    { date: '2025-07-15', headline: 'Advance bookings open' }
+  ]
+}
+```
+
+### IPL Team Asset
+```
+{
+  id: 'csk',
+  ticker: 'CSK',
+  name: 'Chennai Super Kings',
+  category: 'IPL Team',
+  image: '/images/csk.png',
+  description: '5-time IPL champions, known for team consistency.',
+  price: 155.0,
+  change: -3.0,
+  percentChange: -1.9,
+  chartData: [150, 154, 158, 160,
+  newsFeed: [
+    { date: '2025-07-24', headline: 'CSK signs new coach' },
+    { date: '2025-07-18', headline: 'Player fitness update' }
+  ]
+}
+```
+
+---
+
+### 📦 Unified Static Data Arrays (Place in src/data/assets.js)
+```
+export const movieAssets = [ /* ...movie asset objects like above... */ ];
+export const iplTeamAssets = [ /* ...team asset objects like above... */ ];
+```
+
+---
+
+### 🖼️ Example: Asset Card Component (src/components/AssetCard.js)
+```
+import { Line } from 'react-chartjs-2'; // for static graph
+function AssetCard({ asset, onClick }) {
+  return (
+     onClick(asset)}>
+      
+      {asset.name} ({asset.ticker})
+      {asset.category}
+      = 0 ? "text-green-600" : "text-red-500"}>
+        {asset.price} IVC ({asset.change >= 0 ? '+' : ''}{asset.change} / {asset.percentChange}%)
+      
+       `Day ${idx+1}`),
+        datasets: [{ data: asset.chartData, borderColor: "#0ea5e9", fill: true }]
+      }}
+      options={{ plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }}
+      height={60} />
+    
+  );
+}
+```
+
+---
+
+### 🚦 Final Directions for Replit Development
+
+- **Populate all static data in `/src/data/assets.js` and user demo/portfolio/transactions/watchlist in mock files.**
+- **For each route and page, render from static data objects, use React context/props for navigation/state.**
+- **Ensure all “money” displays use “IVC” and replace ₹/INR in every component.**
+- **Add asset cards/lists, charts, and news tickers as exemplified above.**
+- **Test on mobile/desktop, tweak grid layouts and use Tailwind or CSS modules for responsiveness and dark mode.**
+- **Implement all trading/top-up as in-memory (frontend only) logic for the MVP with static portfolio changes.**
+- **Add toasts and modals for all key user actions (buy/sell/watchlist/top-up).**
+
+---
+
+## 📱 **By following this unified prompt block, you can now complete all outstanding MVP requirements (including HSX-style UX for assets, custom coin, static news/tickers, and graphical asset presentation) on Replit for InvestIn, using static/mock data and responsive, rich UI.**
+```
+: https://www.hsx.com
+```
+
+[1] https://www.hsx.com
