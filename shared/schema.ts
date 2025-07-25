@@ -7,6 +7,9 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   balance: decimal("balance", { precision: 10, scale: 2 }).notNull().default("100000.00"),
+  walletBalance: decimal("wallet_balance", { precision: 10, scale: 2 }).notNull().default("10000.00"), // Signup credits
+  totalCreditsEarned: decimal("total_credits_earned", { precision: 10, scale: 2 }).notNull().default("10000.00"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const assets = pgTable("assets", {
@@ -56,6 +59,9 @@ export const watchlists = pgTable("watchlists", {
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   balance: true,
+  walletBalance: true,
+  totalCreditsEarned: true,
+  createdAt: true,
 });
 
 export const insertAssetSchema = createInsertSchema(assets).omit({

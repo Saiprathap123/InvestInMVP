@@ -54,16 +54,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
       });
 
+      // Check if user has sufficient wallet balance for BUY orders
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const totalCost = parseFloat(validatedData.totalAmount);
+      const currentWalletBalance = parseFloat(user.walletBalance);
+
+      if (validatedData.type === "BUY" && currentWalletBalance < totalCost) {
+        return res.status(400).json({ 
+          message: "Insufficient wallet balance",
+          required: totalCost,
+          available: currentWalletBalance
+        });
+      }
+
+      // Create transaction
       const transaction = await storage.createTransaction(validatedData);
 
-      // Update portfolio
+      // Update wallet balance and portfolio
       if (validatedData.type === "BUY") {
+        // Deduct from wallet
+        const newWalletBalance = (currentWalletBalance - totalCost).toFixed(2);
+        await storage.updateWalletBalance(userId, newWalletBalance);
+
+        // Update portfolio
         await storage.createOrUpdatePortfolio({
           userId,
           assetId: validatedData.assetId,
           quantity: validatedData.quantity,
           averagePrice: validatedData.price,
         });
+      } else if (validatedData.type === "SELL") {
+        // Add to wallet
+        const newWalletBalance = (currentWalletBalance + totalCost).toFixed(2);
+        await storage.updateWalletBalance(userId, newWalletBalance);
+
+        // Update portfolio (reduce quantity)
+        const portfolioItem = await storage.getPortfolioItem(userId, validatedData.assetId);
+        if (portfolioItem && portfolioItem.quantity >= validatedData.quantity) {
+          const newQuantity = portfolioItem.quantity - validatedData.quantity;
+          if (newQuantity > 0) {
+            await storage.createOrUpdatePortfolio({
+              userId,
+              assetId: validatedData.assetId,
+              quantity: -validatedData.quantity, // Negative to reduce quantity
+              averagePrice: validatedData.price,
+            });
+          }
+        }
       }
 
       res.json(transaction);
@@ -147,13 +188,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .slice(0, 3);
 
+      // Get user for wallet info
+      const user = await storage.getUser(userId);
+
       const dashboardData = {
         portfolio: {
           total: totalValue.toFixed(2),
           todayPL: todayPL.toFixed(2),
           plPercentage: plPercentage.toFixed(1),
           activeAssets: portfolio.length,
-          balance: "125000.00", // Demo balance
+          balance: user?.balance || "125000.00",
+          walletBalance: user?.walletBalance || "15000.00",
         },
         topPerformers,
         watchlist: watchlist.slice(0, 3),
@@ -163,6 +208,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(dashboardData);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch dashboard data" });
+    }
+  });
+
+  // Wallet routes
+  app.get("/api/wallet", async (req, res) => {
+    try {
+      const userId = 1; // For demo, using default user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({
+        walletBalance: user.walletBalance,
+        totalCreditsEarned: user.totalCreditsEarned,
+        availableBalance: user.balance,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch wallet data" });
+    }
+  });
+
+  app.post("/api/wallet/add-credits", async (req, res) => {
+    try {
+      const userId = 1; // For demo, using default user
+      const { amount } = req.body;
+      
+      if (!amount || parseFloat(amount) <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      await storage.addCreditsToWallet(userId, amount);
+      const user = await storage.getUser(userId);
+      
+      res.json({
+        message: "Credits added successfully",
+        walletBalance: user?.walletBalance,
+        totalCreditsEarned: user?.totalCreditsEarned,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add credits" });
     }
   });
 

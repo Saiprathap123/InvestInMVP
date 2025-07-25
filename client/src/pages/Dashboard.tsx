@@ -19,6 +19,7 @@ interface DashboardData {
     plPercentage: string;
     activeAssets: number;
     balance: string;
+    walletBalance: string;
   };
   topPerformers: Array<{
     id: number;
@@ -137,8 +138,8 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Available Balance</p>
-                <p className="text-2xl font-bold text-gray-900">₹{parseFloat(portfolio.balance).toLocaleString()}</p>
+                <p className="text-sm font-medium text-gray-600">Wallet Balance</p>
+                <p className="text-2xl font-bold text-gray-900">₹{parseFloat(portfolio.walletBalance).toLocaleString()}</p>
               </div>
               <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
                 <Wallet className="h-6 w-6 text-gray-600" />
@@ -146,7 +147,7 @@ export default function Dashboard() {
             </div>
             <div className="mt-4">
               <Button variant="link" className="text-brand-blue p-0 h-auto font-medium">
-                Add more funds
+                Add more credits
               </Button>
             </div>
           </CardContent>

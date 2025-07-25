@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, TrendingUp, TrendingDown } from "lucide-react";
+import { Search, TrendingUp, TrendingDown, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
+import TradingModal from "@/components/TradingModal";
 import type { Asset } from "@shared/schema";
 
 export default function Marketplace() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: assets, isLoading } = useQuery<Asset[]>({
     queryKey: ["/api/assets"],
@@ -101,7 +104,13 @@ export default function Marketplace() {
                       {isPositive ? "+" : ""}{asset.changePercent.toFixed(1)}%
                     </span>
                   </div>
-                  <Button className="w-full bg-brand-blue text-white hover:bg-blue-600">
+                  <Button 
+                    className="w-full bg-brand-blue text-white hover:bg-blue-600"
+                    onClick={() => {
+                      setSelectedAsset(asset);
+                      setIsModalOpen(true);
+                    }}
+                  >
                     Trade Now
                   </Button>
                 </CardContent>
@@ -176,9 +185,21 @@ export default function Marketplace() {
                         ₹{(parseFloat(asset.marketCap) / 10000000).toFixed(1)}Cr
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <Button size="sm" className="bg-brand-blue text-white hover:bg-blue-600">
-                          Trade
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button 
+                            size="sm" 
+                            className="bg-brand-blue text-white hover:bg-blue-600"
+                            onClick={() => {
+                              setSelectedAsset(asset);
+                              setIsModalOpen(true);
+                            }}
+                          >
+                            Trade
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -188,6 +209,15 @@ export default function Marketplace() {
           </div>
         </CardContent>
       </Card>
+
+      <TradingModal
+        asset={selectedAsset}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedAsset(null);
+        }}
+      />
     </div>
   );
 }

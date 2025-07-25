@@ -22,6 +22,8 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserBalance(userId: number, balance: string): Promise<void>;
+  updateWalletBalance(userId: number, walletBalance: string): Promise<void>;
+  addCreditsToWallet(userId: number, amount: string): Promise<void>;
 
   // Assets
   getAllAssets(): Promise<Asset[]>;
@@ -79,6 +81,9 @@ export class MemStorage implements IStorage {
       username: "demo",
       password: "demo",
       balance: "125000.00",
+      walletBalance: "15000.00", // Demo user starts with extra credits
+      totalCreditsEarned: "15000.00",
+      createdAt: new Date(),
     };
     this.users.set(1, defaultUser);
     this.currentUserId = 2;
@@ -166,7 +171,13 @@ export class MemStorage implements IStorage {
     ];
 
     initialAssets.forEach((asset) => {
-      const assetWithId: Asset = { ...asset, id: this.currentAssetId++ };
+      const assetWithId: Asset = { 
+        ...asset, 
+        id: this.currentAssetId++,
+        imageUrl: asset.imageUrl || null,
+        description: asset.description || null,
+        category: asset.category || null,
+      };
       this.assets.set(assetWithId.id, assetWithId);
     });
 
@@ -246,7 +257,14 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id, balance: "100000.00" };
+    const user: User = { 
+      ...insertUser, 
+      id, 
+      balance: "100000.00",
+      walletBalance: "10000.00", // Signup credits for new users
+      totalCreditsEarned: "10000.00",
+      createdAt: new Date(),
+    };
     this.users.set(id, user);
     return user;
   }
@@ -255,6 +273,27 @@ export class MemStorage implements IStorage {
     const user = this.users.get(userId);
     if (user) {
       user.balance = balance;
+      this.users.set(userId, user);
+    }
+  }
+
+  async updateWalletBalance(userId: number, walletBalance: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.walletBalance = walletBalance;
+      this.users.set(userId, user);
+    }
+  }
+
+  async addCreditsToWallet(userId: number, amount: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      const currentWallet = parseFloat(user.walletBalance);
+      const creditsToAdd = parseFloat(amount);
+      const currentTotal = parseFloat(user.totalCreditsEarned);
+      
+      user.walletBalance = (currentWallet + creditsToAdd).toFixed(2);
+      user.totalCreditsEarned = (currentTotal + creditsToAdd).toFixed(2);
       this.users.set(userId, user);
     }
   }
@@ -273,7 +312,14 @@ export class MemStorage implements IStorage {
 
   async createAsset(insertAsset: InsertAsset): Promise<Asset> {
     const id = this.currentAssetId++;
-    const asset: Asset = { ...insertAsset, id, createdAt: new Date() };
+    const asset: Asset = { 
+      ...insertAsset, 
+      id, 
+      imageUrl: insertAsset.imageUrl || null,
+      description: insertAsset.description || null,
+      category: insertAsset.category || null,
+      createdAt: new Date() 
+    };
     this.assets.set(id, asset);
     return asset;
   }
@@ -340,6 +386,7 @@ export class MemStorage implements IStorage {
     const transaction: Transaction = {
       ...insertTransaction,
       id,
+      status: insertTransaction.status || "completed",
       createdAt: new Date(),
     };
     this.transactions.set(id, transaction);
